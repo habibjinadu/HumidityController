@@ -85,7 +85,6 @@
 #pragma config GCP = OFF    //General Segment Code Protect->Code protection is disabled
 #pragma config JTAGEN = OFF    //JTAG Port Enable->Disabled
 
-// SLEEP DEFINITIONS --- HABIB
 // MACROS for Idle, Sleep modes
 #define Nop() {__asm__ volatile ("nop");}
 #define ClrWdt() {__asm__ volatile ("clrwdt");}
@@ -96,12 +95,12 @@
 #include "pin_manager.h"
 #include "clock.h"
 #include "system.h"
-#include "i2c1_driver.h"
+#include "spi1.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "uart2.h"
-#include "spi1.h"
 #include "rtcc.h"
+#include "uart2.h"
+#include "i2c1_driver.h"
 
 void SYSTEM_Initialize(void)
 {
@@ -111,7 +110,6 @@ void SYSTEM_Initialize(void)
     //UART2_Initialize();
     SPI1_Initialize();
     RTCC_Initialize();
-
 }
 
 /**
