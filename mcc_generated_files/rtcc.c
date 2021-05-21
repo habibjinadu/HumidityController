@@ -89,6 +89,7 @@ void RTCC_Initialize(void)
 
    // ALRMPTR MIN_SEC; AMASK Every Second; ARPT 16; CHIME enabled; ALRMEN enabled; 
    ALCFGRPT = 0xC410;
+   ALCFGRPTbits.AMASK = 0b0010; // override AMASK and trigger alarm every 10 sec
 
    // RTCOUT Alarm Pulse; PWSPRE disabled; RTCLK LPRC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 
    RTCPWC = 0x400;

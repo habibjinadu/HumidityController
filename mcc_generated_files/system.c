@@ -96,21 +96,22 @@
 #include "pin_manager.h"
 #include "clock.h"
 #include "system.h"
-#include "spi1.h"
 #include "i2c1_driver.h"
-#include "rtcc.h"
 #include "interrupt_manager.h"
 #include "traps.h"
 #include "uart2.h"
+#include "spi1.h"
+#include "rtcc.h"
 
 void SYSTEM_Initialize(void)
 {
     PIN_MANAGER_Initialize();
-    CLOCK_Initialize();
     INTERRUPT_Initialize();
-//    UART2_Initialize(); // do not enable the UART right now
+    CLOCK_Initialize();
+    //UART2_Initialize();
+    SPI1_Initialize();
     RTCC_Initialize();
-    SPI1_Initialize ();
+
 }
 
 /**

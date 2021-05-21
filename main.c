@@ -47,6 +47,7 @@
 */
 #include "mcc_generated_files/system.h"
 
+
 /*
                          Main application
  */
@@ -57,7 +58,8 @@ int main(void)
     Disp2String("\n\rDoes this work?");
     while (1)
     {
-        // Add your application code
+        displayDateAndTime(); // display date and time to tera term
+        Sleep(); // sleep
     }
 
     return 1;
