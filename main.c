@@ -49,14 +49,19 @@
 #include "bme68x.h"
 #include "bme68x_defs.h"
 #include "BME680.h"
-
+#include "diskio.h"
+#include "ff.h"
+#include "ffconf.h"
+#include "SDFunctions.h"
 /*
                          Main application
  */
 int main(void)
 {
-    // initialize the device
+    // initialize the PIC device
     SYSTEM_Initialize();
+    
+    /*------INITIALIZATION CODE FOR THE BME680--------------*/
     struct bme68x_dev bme; // define the struct for the BME device
     int8_t rslt;            // define the result
     struct bme68x_conf conf; // define the struct for the BME configuration
@@ -68,8 +73,6 @@ int main(void)
     uint16_t sample_count = 1;
     
     rslt = bme68x_init(&bme); // initialize the BME680
-    Disp2String("\n\rResult of bme680_init is:");
-    Disp2Dec(rslt);
     
     /* Check if rslt == BME68X_OK, report or handle if otherwise */
     conf.filter = BME68X_FILTER_OFF;
@@ -78,18 +81,21 @@ int main(void)
     conf.os_pres = BME68X_OS_1X;
     conf.os_temp = BME68X_OS_2X;
     rslt = bme68x_set_conf(&conf, &bme);
-    Disp2String("\n\rResult of set_conf is:");
-    Disp2Dec(rslt);
+
     
     /* Check if rslt == BME68X_OK, report or handle if otherwise */
     heatr_conf.enable = BME68X_ENABLE;
     heatr_conf.heatr_temp = 300;
     heatr_conf.heatr_dur = 100;
     rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &bme);
-    Disp2String("\n\rResult of set_conf is:");
-    Disp2Dec(rslt);
+
+    /*-----------INITIALIZATION CODE FOR THE SD CARD ----------------------*/
+    FATFS FatFs;	/* FatFs work area needed for each volume */
+    FIL Fil;		/* File object needed for each open file */
+    char * fileName = "dataLog.txt"; // file name
+    int result = f_mount(&FatFs, "", 1);
     
-    Disp2String("\n\rTemperature(deg C), Pressure(Pa), Humidity(%%), Gas resistance(ohm), Status\n");
+    
     while (1)
     {
         displayDateAndTime(); // display date and time to tera term
@@ -103,14 +109,30 @@ int main(void)
         /* Check if rslt == BME68X_OK, report or handle if otherwise */
         rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme);
         Disp2Dec(data.temperature / 100);
-        Disp2String("              ");
+        Disp2String(",              ");
         Disp2Dec((long unsigned int)data.pressure);
-        Disp2String("          ");
+        Disp2String(",          ");
         Disp2Dec((long unsigned int)(data.humidity / 1000));
-        Disp2String("         ");
+        Disp2String(",         ");
         Disp2Dec((long unsigned int)data.gas_resistance);
-        Disp2String("       ");
+        Disp2String(",       ");
         Disp2Dec(data.status);
+        
+        if (result == FR_OK) 
+    {
+
+        result = f_open(&Fil, fileName, FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
+        Disp2String("\n\rThe result of f_open is: ");
+        Disp2Dec(result);
+        if (result == FR_OK) /* Open or create a file */
+        {	
+            f_printf(&Fil,"Temp: %d",data.temperature/100);
+            //char* sentence = "This time, we put it in a function!!!\n"; // get a sentence
+            //writeToEndOfFile(&Fil, sentence); // write this sentence to the card
+			f_close(&Fil);
+        }
+
+    }
         bme68x_set_op_mode(BME68X_SLEEP_MODE,&bme); // go to sleep mode
         Sleep(); // sleep
     }
