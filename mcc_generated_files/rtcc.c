@@ -50,6 +50,7 @@
 
 #include "rtcc.h"
 
+
 /**
 * Section: Function Prototype
 */
@@ -230,40 +231,73 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime)
 
 void displayDateAndTime ()
 {
-        bcdTime_t* time; // declare a time struct to store the time
+  
         
         uint16_t register_value;
         RCFGCALbits.RTCPTR = 3; // reset the RTC pointer to the year register
         //RTCC_BCDTimeGet(time); // get the current time, and store it in time
         
         Disp2String("\n\rCurrent Time is: ");
-        uint16_t year = RTCVAL; // get the year BCD
+        uint8_t year = RTCVAL & 0x00FF; // get the year BCD
         Disp2BCDDigit((year)>>4); // get the tens place for the year
         Disp2BCDDigit((year)); // get the ones place for the year
         Disp2String("/"); // send a /
+        
         register_value = RTCVAL;
-        uint16_t mon = (register_value & 0xFF00) >> 8; // extract the mon BCD
+        uint8_t mon = (register_value & 0xFF00) >> 8; // extract the mon BCD
         Disp2BCDDigit((mon)>>4);
         Disp2BCDDigit(mon);
         Disp2String("/"); // send a /
-        uint16_t mday = register_value & 0x00FF; // extrace the mday BCD
+        
+        uint16_t mday = register_value & 0x00FF; // extract the mday BCD
         Disp2BCDDigit((mday)>>4);
         Disp2BCDDigit(mday);
         XmitUART2(32,1); // send a white space
+        
         register_value = RTCVAL;
         uint16_t hour = register_value & 0x00FF; // extract the hour BCD
         Disp2BCDDigit((hour)>>4);
         Disp2BCDDigit(hour);
         XmitUART2(58,1); // send a semi colon
+        
         register_value = RTCVAL;
         uint16_t min = (register_value & 0xFF00) >> 8; // extract the min BCD
         Disp2BCDDigit((min)>>4);
         Disp2BCDDigit(min);
         XmitUART2(58,1); // send a semi colon
+        
         uint16_t sec = register_value & 0x00FF; // extract the sec BCD
         Disp2BCDDigit(sec >>4);
         Disp2BCDDigit(sec); 
 
+
+}
+
+void getDateAndTime(bcdTime_t* time)
+{
+    uint16_t register_value; // create a variable to hold the register content
+    RCFGCALbits.RTCPTR = 3; // reset the RTC pointer to the year register
+    uint8_t year = RTCVAL & 0x00FF; // get the year BCD
+    time->tm_year = ConvertBCDToHex(year);
+    
+    register_value = RTCVAL; // get the value of the next register
+    uint8_t mon = (register_value & 0xFF00) >> 8; // extract the month BCD
+    time->tm_mon = ConvertBCDToHex(mon); // store the month in the time struct
+    
+    uint16_t mday = register_value & 0x00FF; // extract the mday BCD
+    time->tm_mday = ConvertBCDToHex(mday);
+    
+    register_value = RTCVAL; // get the value of the next register
+    uint16_t hour = register_value & 0x00FF; // extract the hour BCD
+    
+    time->tm_hour = ConvertBCDToHex(hour); // store the hour in the time struct
+    register_value = RTCVAL; // get the value of the next register
+    
+    uint16_t min = (register_value & 0xFF00) >> 8; // extract the min BCD
+    time->tm_min = ConvertBCDToHex(min); // store the min in the time struct
+    
+    uint16_t sec = register_value & 0x00FF; // extract the sec BCD
+    time->tm_sec = ConvertBCDToHex(sec); // store the sec in the time struct
 }
 static uint8_t ConvertHexToBCD(uint8_t hexvalue)
 {

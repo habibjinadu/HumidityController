@@ -53,6 +53,7 @@
 #include "ff.h"
 #include "ffconf.h"
 #include "SDFunctions.h"
+#include "mcc_generated_files/rtcc.h"
 /*
                          Main application
  */
@@ -94,11 +95,15 @@ int main(void)
     FIL Fil;		/* File object needed for each open file */
     char * fileName = "dataLog.txt"; // file name
     int result = f_mount(&FatFs, "", 1);
+    bcdTime_t time; // define a time structure
     
     
     while (1)
     {
         displayDateAndTime(); // display date and time to tera term
+        // get the date and time values and store them in the time object
+        getDateAndTime(&time); 
+        
         Disp2String("\n\rTemperature(deg C), Pressure(Pa), Humidity(%%), Gas resistance(ohm), Status\n\r");
         rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme);
 
@@ -126,7 +131,10 @@ int main(void)
         Disp2Dec(result);
         if (result == FR_OK) /* Open or create a file */
         {	
-            f_printf(&Fil,"Temp: %d",data.temperature/100);
+            f_printf(&Fil,"20%d/%d/%d, %d:%d:%d, %d, %d, %d, %d",
+                time.tm_year,time.tm_mon, time.tm_mday, time.tm_hour, 
+                time.tm_min, time.tm_sec,data.temperature/100, 
+                data.pressure,data.humidity / 1000,data.gas_resistance);
             //char* sentence = "This time, we put it in a function!!!\n"; // get a sentence
             //writeToEndOfFile(&Fil, sentence); // write this sentence to the card
 			f_close(&Fil);

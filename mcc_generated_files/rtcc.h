@@ -67,15 +67,15 @@
  /**------DEFINE A NEW STRUCTURE TO HOLD THE TIME VALUES - HABIB --------- */
 struct timeStruct
 	{	/* date and time components */
-	uint16_t tm_sec;
-	uint16_t tm_min;
-	uint16_t tm_hour;
-	uint16_t tm_mday;
-	uint16_t tm_mon;
-	uint16_t tm_year;
-	uint16_t tm_wday;
-	uint16_t tm_yday;
-	uint16_t tm_isdst;
+	uint8_t tm_sec;
+	uint8_t tm_min;
+	uint8_t tm_hour;
+	uint8_t tm_mday;
+	uint8_t tm_mon;
+	uint8_t tm_year;
+	uint8_t tm_wday;
+	uint8_t tm_yday;
+	uint8_t tm_isdst;
 	};
 
 typedef struct timeStruct bcdTime_t;
@@ -251,7 +251,9 @@ void RTCC_TimeReset(bool reset);
 */
 void RTCC_CallBack(void);
 
-void displayDateAndTime (void);
+void displayDateAndTime ();
+
+void getDateAndTime(bcdTime_t* time);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
