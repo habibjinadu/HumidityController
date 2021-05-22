@@ -54,6 +54,7 @@
 #include "ffconf.h"
 #include "SDFunctions.h"
 #include "mcc_generated_files/rtcc.h"
+#include "IR.h"
 /*
                          Main application
  */
@@ -94,7 +95,7 @@ int main(void)
     FATFS FatFs;	/* FatFs work area needed for each volume */
     FIL Fil;		/* File object needed for each open file */
     char * fileName = "dataLog.txt"; // file name
-    int result = f_mount(&FatFs, "", 1);
+    int result; // make a variable to store the result of the SD card functions
     bcdTime_t time; // define a time structure
     
     
@@ -122,16 +123,17 @@ int main(void)
         Disp2Dec((long unsigned int)data.gas_resistance);
         Disp2String(",       ");
         Disp2Dec(data.status);
-        
+    
+    result = f_mount(&FatFs, "", 1);
         if (result == FR_OK) 
     {
 
-        result = f_open(&Fil, fileName, FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
+        result = f_open(&Fil, fileName, FA_OPEN_APPEND | FA_READ | FA_WRITE);
         Disp2String("\n\rThe result of f_open is: ");
         Disp2Dec(result);
         if (result == FR_OK) /* Open or create a file */
         {	
-            f_printf(&Fil,"20%d/%d/%d, %d:%d:%d, %d, %d, %d, %d",
+            f_printf(&Fil,"20%d/%d/%d, %d:%d:%d, %d, %d, %d, %d\n",
                 time.tm_year,time.tm_mon, time.tm_mday, time.tm_hour, 
                 time.tm_min, time.tm_sec,data.temperature/100, 
                 data.pressure,data.humidity / 1000,data.gas_resistance);
@@ -141,8 +143,11 @@ int main(void)
         }
 
     }
-        bme68x_set_op_mode(BME68X_SLEEP_MODE,&bme); // go to sleep mode
-        Sleep(); // sleep
+    
+    //pwrOn(); // turn on the fan
+    sendMessage(FAN_POWER_OFF_ECO_SPEED);
+    bme68x_set_op_mode(BME68X_SLEEP_MODE,&bme); // put the BME680 in sleep mode
+    Sleep(); // put the PIC to sleep
     }
 
     return 1;

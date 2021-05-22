@@ -229,6 +229,9 @@ void RTCC_BCDTimeSet(bcdTime_t *initialTime)
    IEC3bits.RTCIE = 1;
 }
 
+/**
+ * This function transmits the RTC's date and time through the UART bus
+ */
 void displayDateAndTime ()
 {
   
@@ -273,6 +276,11 @@ void displayDateAndTime ()
 
 }
 
+/**
+ * This function retrieves the date and time from the rtcc registers and 
+ * stores them in the time structure
+ * @param time struct to hold the date and time
+ */
 void getDateAndTime(bcdTime_t* time)
 {
     uint16_t register_value; // create a variable to hold the register content

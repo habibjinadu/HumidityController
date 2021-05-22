@@ -125,7 +125,7 @@
     </code>
 
 */
-#define IR_TX_Toggle()           (_LATB10 ^= 1)
+#define IR_TX_Toggle()           (_LATB10 = ~_LATB10)
 /**
   @Summary
     Reads the value of the GPIO pin, RB10.
