@@ -49,6 +49,7 @@
 */
 
 #include "rtcc.h"
+#include "uart2.h"
 
 
 /**
@@ -340,10 +341,13 @@ void __attribute__ ((weak)) RTCC_CallBack(void)
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _ISR _RTCCInterrupt( void )
 {
 	// RTCC callback function 
-	RTCC_CallBack();
+//	RTCC_CallBack();
 	
+    
     /* TODO : Add interrupt handling code */
     IFS3bits.RTCIF = false;
+    
+    
 }
 
 

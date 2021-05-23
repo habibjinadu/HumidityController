@@ -101,6 +101,8 @@
 #include "rtcc.h"
 #include "uart2.h"
 #include "i2c1_driver.h"
+#include "../tmr2.h"
+
 
 void SYSTEM_Initialize(void)
 {
@@ -110,6 +112,7 @@ void SYSTEM_Initialize(void)
     //UART2_Initialize();
     SPI1_Initialize();
     RTCC_Initialize();
+    TMR2_Initialize();
 }
 
 /**

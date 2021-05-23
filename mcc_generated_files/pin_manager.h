@@ -817,6 +817,12 @@
     </code>
 
 */
+#define IR_RX_GetValue()         _RB3
+#define IR_RX_SetHigh()          (_LATB3 = 1)
+#define IR_RX_SetLow()           (_LATB3 = 0)
+#define IR_RX_SetDigitalInput()  (_TRISB3 = 1)
+#define IR_RX_SetDigitalOutput() (_TRISB3 = 0)
+
 void PIN_MANAGER_Initialize (void);
 
 

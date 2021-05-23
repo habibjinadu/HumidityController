@@ -90,7 +90,8 @@ void PIN_MANAGER_Initialize (void)
      * Setting the Analog/Digital Configuration SFR(s)
      ***************************************************************************/
     ANSA = 0x000F;
-    ANSB = 0x000C;
+    ANSB = 0x0004;
+    
     
     /****************************************************************************
      * Set the PPS
@@ -104,4 +105,5 @@ void PIN_MANAGER_Initialize (void)
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock PPS
 }
+
 

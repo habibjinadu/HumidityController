@@ -164,4 +164,7 @@ inline static uint16_t INTERRUPT_VectorNumberGet(void)
     return _VECNUM; 
 }
 
+void disableCNInterrupts (void);
+void enableCNInterrupts(void);
+
 #endif

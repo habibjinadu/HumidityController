@@ -16,14 +16,6 @@
 
 
 
-//Each of the following arrays stores the bit values of the codes required to transmit
-
-
-static bool pwr[MAX_IR_BIT_SIZE] =  {0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,1,1,
-                      0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,0};
-
-
-
 //-----------------------------------------------------------------------------------------------------------//
 
 //This function will create the 38KHz carrier for the IR signals
@@ -75,21 +67,6 @@ void startBit(){
 
 //----------------------------------------------------------------------------------------------------------------//
 
-//This function send the ON/OFF code via IR
-void pwrOn(){
-    //Begins with start bit
-    startBit();
-    int i=0;
-    //Sends each of the bits as specified by the arrays,
-    for(i ; i<64;i++){
-        if(pwr[i])
-            oneBit();
-        else
-            zeroBit();      
-    }
-    //ends the transmission with a zero bit as a stop bit
-    zeroBit();
- }
 
 /**
  * sends the bit value in the array via Infrared

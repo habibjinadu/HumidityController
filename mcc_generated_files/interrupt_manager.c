@@ -52,6 +52,13 @@
 */
 void INTERRUPT_Initialize (void)
 {
+    // CNI: CNIE
+    // enable interrupts
+        IFS1bits.CNIF = 0; // clear the interrupt flag
+        IEC1bits.CNIE = 1; // enable pin notification interrupts
+        IPC4bits.CNIP = 1; // enable the priority to 1
+        CNEN1bits.CN7IE = 1; // enable interrupts on CN7:RB3
+        
     //    RTCI: RTCC - Real-Time Clock and Calendar
     //    Priority: 1
         IPC15bits.RTCIP = 1;
@@ -62,4 +69,14 @@ void INTERRUPT_Initialize (void)
     //    Priority: 1
         IPC4bits.SI2C1IP = 1;
 
+}
+
+void disableCNInterrupts (void)
+{
+    IEC1bits.CNIE = 0; // disable pin notification interrupts
+}
+
+void enableCNInterrupts (void)
+{
+    IEC1bits.CNIE = 1; // enable pin notification interrupts
 }
