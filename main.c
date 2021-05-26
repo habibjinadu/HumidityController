@@ -45,6 +45,8 @@
 /**
   Section: Included Files
 */
+
+
 #include "mcc_generated_files/system.h"
 #include "bme68x.h"
 #include "bme68x_defs.h"
@@ -59,16 +61,33 @@
 #include "IR_Receiver.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/interrupt_manager.h"
+
+#define FCY 4000000UL
+#include <libpic30.h>
 /*
                          Main application
  */
 
+// function prototype for BME get data
+void getBME680Data(struct bme68x_dev* bme, struct bme68x_conf* conf,
+                    struct bme68x_heatr_conf* heatr_conf, uint32_t* del_period,
+                    struct bme68x_data* data, uint8_t* n_fields); 
 
+void writeBME680DataToSDCard(FIL* Fil, char* fileName, 
+                                                    struct bme68x_data* data,
+                                                    bcdTime_t* time);
+typedef enum FAN_STATUS
+{
+    FAN_IS_OFF,      // (0) fan is off
+    FAN_IS_ON       // (1) fan is on
+}FAN_STATUS;
 
+uint8_t fanStatus = FAN_IS_ON; // initialize fan status as off
 int main(void)
 {
     // initialize the PIC device
     SYSTEM_Initialize();
+    __delay_ms(100); // delay for 100 ms
     
     /*------INITIALIZATION CODE FOR THE BME680--------------*/
     struct bme68x_dev bme; // define the struct for the BME device
@@ -77,9 +96,7 @@ int main(void)
     struct bme68x_heatr_conf heatr_conf; // struct for the heater configuration
     struct bme68x_data data; // struct for the data
     uint32_t del_period;
-    uint32_t time_ms = 0;
     uint8_t n_fields;
-    uint16_t sample_count = 1;
     
     rslt = bme68x_init(&bme); // initialize the BME680
     
@@ -104,6 +121,7 @@ int main(void)
     char * fileName = "dataLog.txt"; // file name
     int result; // make a variable to store the result of the SD card functions
     bcdTime_t time; // define a time structure
+    f_mount(&FatFs, "", 1); // mount the SD card
     
     /*--------------INITIALIZATION CODE FOR THE IR RECEIVER---------------*/
     uint64_t IR_Message; // create a variable to hold the IR message
@@ -112,62 +130,86 @@ int main(void)
         if (CN_interrupt_flag == 1) // if there is a change notification 
         {
             IR_Message = decode_IR(); // decode the IR message
-            Disp2String("\n\r");
-            Disp2Hex64(IR_Message); // display to UART
         }
+        
         disableCNInterrupts(); // disable CN Interrupts
         
-        displayDateAndTime(); // display date and time to tera term
+        //displayDateAndTime(); // display date and time to tera term
         // get the date and time values and store them in the time object
         getDateAndTime(&time); 
+        
+        getBME680Data(&bme,&conf,&heatr_conf,&del_period,&data, &n_fields);
+        
 
-        Disp2String("\n\rTemperature(deg C), Pressure(Pa), Humidity(%%), Gas resistance(ohm), Status\n\r");
-        rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme);
+//        Disp2String("\n\r");
+//        Disp2Dec(data.temperature / 100);
+//        Disp2String(",              ");
+//        Disp2Dec((long unsigned int)data.pressure);
+//        Disp2String(",          ");
+//        Disp2Dec((long unsigned int)(data.humidity / 1000));
+//        Disp2String(",         ");
+//        Disp2Dec((long unsigned int)data.gas_resistance);
+//        Disp2String(",       ");
+//        Disp2Dec(data.status);
 
-        /* Calculate delay period in microseconds */
-        del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme) + (heatr_conf.heatr_dur * 1000);
-        bme.delay_us(del_period, bme.intf_ptr);
 
-        /* Check if rslt == BME68X_OK, report or handle if otherwise */
-        rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme);
-        Disp2Dec(data.temperature / 100);
-        Disp2String(",              ");
-        Disp2Dec((long unsigned int)data.pressure);
-        Disp2String(",          ");
-        Disp2Dec((long unsigned int)(data.humidity / 1000));
-        Disp2String(",         ");
-        Disp2Dec((long unsigned int)data.gas_resistance);
-        Disp2String(",       ");
-        Disp2Dec(data.status);
-
-        result = f_mount(&FatFs, "", 1);
-            if (result == FR_OK) 
+        
+        writeBME680DataToSDCard(&Fil, fileName, &data, &time);
+        
+        if ((long unsigned int)(data.humidity / 1000) > 50 && 
+                                                        fanStatus == FAN_IS_OFF)
         {
-
-            result = f_open(&Fil, fileName, FA_OPEN_APPEND | FA_READ | FA_WRITE);
-            Disp2String("\n\rThe result of f_open is: ");
-            Disp2Dec(result);
-            if (result == FR_OK) /* Open or create a file */
-            {	
-                f_printf(&Fil,"20%d/%d/%d, %d:%d:%d, %d, %lu, %lu, %lu\n",
-                    time.tm_year,time.tm_mon, time.tm_mday, time.tm_hour, 
-                    time.tm_min, time.tm_sec,data.temperature/100, 
-                    (long unsigned int)data.pressure,
-                    (long unsigned int)(data.humidity / 1000),
-                    (long unsigned int)data.gas_resistance);
-
-                f_close(&Fil);
-            }
-
+            sendMessage(FAN_POWER_ON_ECO_SPEED_NATURAL_WIND);
+            fanStatus = FAN_IS_ON; // update the fan status
         }
-
+        else if ((long unsigned int)(data.humidity / 1000) < 45 && 
+                                                        fanStatus == FAN_IS_ON)
+        {
+            sendMessage(FAN_POWER_OFF); // turn the fan off
+            fanStatus = FAN_IS_OFF; // update the fan status
+        }
+        
+        bme68x_set_op_mode(BME68X_SLEEP_MODE,&bme); // put the BME680 in sleep mode
         enableCNInterrupts();
-    //sendMessage(EVENING_WIND);
-    bme68x_set_op_mode(BME68X_SLEEP_MODE,&bme); // put the BME680 in sleep mode
-    Sleep(); // put the PIC to sleep
+        Sleep(); // put the PIC to sleep
     }
 
     return 1;
+}
+
+void getBME680Data(struct bme68x_dev* bme, struct bme68x_conf* conf,
+                    struct bme68x_heatr_conf* heatr_conf, uint32_t* del_period,
+                    struct bme68x_data* data, uint8_t* n_fields)
+{
+    bme68x_set_op_mode(BME68X_FORCED_MODE, bme); // change op mode to forced
+    /* Calculate delay period in microseconds */
+    *del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, conf, bme) + 
+                                                (heatr_conf->heatr_dur * 1000);
+    bme->delay_us(*del_period, bme->intf_ptr);
+    
+    /* Check if rslt == BME68X_OK, report or handle if otherwise */
+    bme68x_get_data(BME68X_FORCED_MODE, data, n_fields, bme);
+}
+
+void writeBME680DataToSDCard(FIL* Fil, char* fileName, 
+                                                    struct bme68x_data* data,
+                                                    bcdTime_t* time)
+{
+    int result = f_open(Fil, fileName, FA_OPEN_APPEND | FA_READ | FA_WRITE);
+    //Disp2String("\n\rThe result of f_open is: ");
+    //Disp2Dec(result);
+    if (result == FR_OK) /* Open or create a file */
+    {	
+        f_printf(Fil,"20%d/%d/%d, %d:%d:%d, %d, %lu, %lu, %lu\n",
+            time->tm_year,time->tm_mon, time->tm_mday, time->tm_hour, 
+            time->tm_min, time->tm_sec,data->temperature/100, 
+            (long unsigned int)data->pressure,
+            (long unsigned int)(data->humidity / 1000),
+            (long unsigned int)data->gas_resistance);
+
+        f_close(Fil);
+    }
+
 }
 /**
  End of File

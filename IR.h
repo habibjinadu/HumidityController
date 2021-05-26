@@ -12,11 +12,12 @@
 extern "C" {
 #endif
 
-#define MAX_IR_BIT_SIZE    64
-#define INT_MSG_SIZE      uint64_t
-#define FAN_POWER_ON_ECO_SPEED      0x1120304350006072
-#define FAN_POWER_OFF_ECO_SPEED     0x1020304350006073
-#define EVENING_WIND                0x1120314153026071
+#define MAX_IR_BIT_SIZE                         64
+#define INT_MSG_SIZE                            uint64_t
+#define FAN_POWER_ON_ECO_SPEED                  0x1120304350006072
+#define FAN_POWER_OFF                           0x1020304350006073
+#define FAN_POWER_ON_ECO_SPEED_NATURAL_WIND     0x1120314353006073
+#define SWITCH_TO_EVENING_WIND                  0x1120314353046077    
     
 void carrier(uint16_t clkCycles);
 void oneBit();

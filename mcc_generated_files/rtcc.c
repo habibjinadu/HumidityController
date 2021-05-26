@@ -77,21 +77,21 @@ void RTCC_Initialize(void)
        // set RTCC time 2021-05-17 21-14-33
        RCFGCALbits.RTCPTR = 3;        // start the sequence
        RTCVAL = 0x21;    // YEAR
-       RTCVAL = 0x517;    // MONTH-1/DAY-1
-       RTCVAL = 0x121;    // WEEKDAY/HOURS
-       RTCVAL = 0x1433;    // MINUTES/SECONDS
+       RTCVAL = 0x523;    // MONTH-1/DAY-1
+       RTCVAL = 0x620;    // WEEKDAY/HOURS
+       RTCVAL = 0x5000;    // MINUTES/SECONDS
    }
 
    // set Alarm time 2021-05-17 21-14-43
    ALCFGRPTbits.ALRMEN = 0;
    ALCFGRPTbits.ALRMPTR = 2;
-   ALRMVAL = 0x517;
-   ALRMVAL = 0x121;
-   ALRMVAL = 0x1443;
+   ALRMVAL = 0x521;
+   ALRMVAL = 0x620;
+   ALRMVAL = 0x5000;
 
    // ALRMPTR MIN_SEC; AMASK Every Second; ARPT 16; CHIME enabled; ALRMEN enabled; 
    ALCFGRPT = 0xC410;
-   ALCFGRPTbits.AMASK = 0b0010; // override AMASK and trigger alarm every 10 sec
+   ALCFGRPTbits.AMASK = 0b0101; // override AMASK and trigger alarm every 10 sec
 
    // RTCOUT Alarm Pulse; PWSPRE disabled; RTCLK LPRC; PWCPRE disabled; PWCEN disabled; PWCPOL disabled; 
    RTCPWC = 0x400;
