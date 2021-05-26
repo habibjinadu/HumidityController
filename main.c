@@ -129,7 +129,14 @@ int main(void)
     {
         if (CN_interrupt_flag == 1) // if there is a change notification 
         {
-            IR_Message = decode_IR(); // decode the IR message
+            disableRTCInterrupts(); // disable RTC interrupts
+            uint8_t bitsReceived;
+            IR_Message = decode_IR(&bitsReceived); // decode the IR message
+            Disp2String("\n\r");
+            Disp2Hex64(IR_Message); // display to UART
+//            Disp2String("\n\rThe number of bits received is:");
+//            Disp2Dec(bitsReceived);
+            enableRTCInterrupts(); // enable RTC interrupts
         }
         
         disableCNInterrupts(); // disable CN Interrupts

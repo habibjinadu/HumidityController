@@ -80,3 +80,15 @@ void enableCNInterrupts (void)
 {
     IEC1bits.CNIE = 1; // enable pin notification interrupts
 }
+
+void disableRTCInterrupts(void)
+{
+    //Disable RTCC interrupt
+   IEC3bits.RTCIE = 0;
+}
+
+void enableRTCInterrupts(void)
+{
+    //Enable RTCC interrupt
+   IEC3bits.RTCIE = 1;
+}

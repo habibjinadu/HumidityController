@@ -166,5 +166,7 @@ inline static uint16_t INTERRUPT_VectorNumberGet(void)
 
 void disableCNInterrupts (void);
 void enableCNInterrupts(void);
+void disableRTCInterrupts(void);
+void enableRTCInterrupts(void);
 
 #endif
