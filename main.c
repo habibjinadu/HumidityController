@@ -133,9 +133,24 @@ int main(void)
             uint8_t bitsReceived;
             IR_Message = decode_IR(&bitsReceived); // decode the IR message
             Disp2String("\n\r");
-            Disp2Hex64(IR_Message); // display to UART
-//            Disp2String("\n\rThe number of bits received is:");
-//            Disp2Dec(bitsReceived);
+            Disp2Hex64(IR_Message);
+            if (IR_Message == 0x61A000FF00000000)
+            {
+               ALCFGRPTbits.AMASK = 0b0001; // set alarm every second 
+            }else if (IR_Message == 0x61A0807F00000000)
+            {
+               ALCFGRPTbits.AMASK = 0b0010; // set alarm every 10 seconds 
+            }else if (IR_Message == 0x61A040BF00000000)
+            {
+                ALCFGRPTbits.AMASK = 0b0010; // set alarm every minute
+            }else if (IR_Message == 0x61A0C03F00000000)
+            {
+                ALCFGRPTbits.AMASK = 0b0100; // set alarm every 10 minutes
+            }else if (IR_Message == 0x61A020DF00000000)
+            {
+                ALCFGRPTbits.AMASK = 0b0101; // set alarm every hour
+            }
+            
             enableRTCInterrupts(); // enable RTC interrupts
         }
         
@@ -158,7 +173,6 @@ int main(void)
 //        Disp2Dec((long unsigned int)data.gas_resistance);
 //        Disp2String(",       ");
 //        Disp2Dec(data.status);
-
 
         
         writeBME680DataToSDCard(&Fil, fileName, &data, &time);

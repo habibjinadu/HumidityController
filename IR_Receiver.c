@@ -197,12 +197,7 @@ void update_message()
     message_bit_position -= 1; // decrease the index by 1
     message |= determine_bit(TMR_hi_duration, TMR_lo_duration) << message_bit_position; // Set the bit in message specified by message_bit_position
     decode_bit = 0; //set decode_bit back to 0
-//    if (message_bit_position == 0)
-//    {
-//        Disp2String("TMR hi and TMR lo is :");
-//        Disp2Dec(TMR_hi_duration);
-//        Disp2Dec(TMR_lo_duration);
-//    }
+
 }
 // Determine whether the pulse represents a 1 bit, or 0 bit
 INT_M_SIZE determine_bit (uint16_t hi_cycles, uint16_t lo_cycles) 
