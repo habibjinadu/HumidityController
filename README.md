@@ -1,4 +1,4 @@
-Some links that were veru helpful throughout the project.
+Some links that were very helpful throughout the project.
 
 FATFS Drivers: 
 http://elm-chan.org/fsw/ff/00index_e.html
